@@ -15,7 +15,8 @@ int main()
   int hour=12, minute=0, second=0;
   int month=1, day=1, year=16;
   int dow=6;
-  
+
+  int alarmHourSet=-1, alarmMinuteSet=-1;
   int alarmHour=-1, alarmMinute=-1;
   int lastMinute=-1;
  /*
@@ -26,7 +27,7 @@ int main()
  */
 
   while(1)
-  {   
+  {
    /*
     *get current hour, minute, seconds from RTC
    */
@@ -37,7 +38,7 @@ int main()
      *lastMinute = minute;
     */
    }
-   
+
    if (checkSwitch(ALRM_SWI) == ON)
    {
      /*
@@ -48,8 +49,20 @@ int main()
        /*
         *sound alarm, freqout function
        */
-     }       
-        
+       if (checkButton(TIME_BTN) == DOWN)
+       {
+         /*
+         *Sleep alarm for 15 minutes
+         */
+         alarmMinute += 15;
+         if(alarmMinute > 59){
+           alarmMinute -= 60
+           alarmHour += 1;
+         }
+
+       }
+     }
+
    }
    else
    {
@@ -72,10 +85,10 @@ int main()
        *Update the Hour and Minute and second variables
        *update real time clock with new time
       */
-    }         
-   }          
-      
-  } /*end of while(1)*/  
+    }
+   }
+
+  } /*end of while(1)*/
 
   /*Code never gets here, if it does print "HALT" on LED */
   return 0;
@@ -88,7 +101,7 @@ int main()
 int checkSwitch(int sw_num)
 {
   return (input(sw_num) == on);
-}  
+}
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /*Return the state of the named switch, down is true, up is false*/
@@ -97,4 +110,4 @@ int checkSwitch(int sw_num)
 int checkButton(int btn_num)
 {
   return (input(btn_num) == down;
-}  
+}
