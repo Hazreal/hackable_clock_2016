@@ -55,9 +55,10 @@ int main()
          *Sleep alarm for 15 minutes
          */
          alarmMinute += 15;
-         if(alarmMinute > 59){
+         if(alarmMinute >= 60){
            alarmMinute -= 60
            alarmHour += 1;
+           FREQOUT 11, 1000, 2500;
          }
 
        }
@@ -86,6 +87,12 @@ int main()
        *update real time clock with new time
       */
     }
+    
+    /*
+    *set alarmMinute and alarmHour to alarmMinuteSet and alarmMinuteSet
+    */
+    alarmHour = alarmHourSet;
+    alarmMinute = alarmMinuteSet;
    }
 
   } /*end of while(1)*/
