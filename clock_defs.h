@@ -1,7 +1,6 @@
 /*
  * Hackable Clock Project 2016-17
  * Microcontroller pin names and other handy names for things
- * arisher@una.edu, 10/25/16
  *
 */
 #ifndef CLOCK_H

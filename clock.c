@@ -1,7 +1,6 @@
 /*
  * Hackable Clock Project 2016-17
  * Clock driver (main program file)
- * arisher@una.edu, 10/25/16
  *
 */
 #include "simpletools.h"
