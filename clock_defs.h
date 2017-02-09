@@ -1,11 +1,26 @@
 /*
- *Hackable Clock 2016-17
- *Common definitions for all code
- *AR, 10/26/2016
- */
+ * Hackable Clock Project 2016-17
+ * Microcontroller pin names and other handy names for things
+ * arisher@una.edu, 10/25/16
+ *
+*/
+#ifndef CLOCK_H
+#define CLOCK_H
 
-#ifndef CLOCK_DEF_H
-#define CLOCK_DEF_H
+/* user defined types */
+typedef unsigned char ubyte;
+
+/* button states */
+#define BTN_DOWN 1
+#define BTN_UP   0
+
+/* switch states */
+#define SW_ON  1
+#define SW_OFF 0
+
+/* cpu pin directions */
+#define PIN_IN  0
+#define PIN_OUT 1
 
 /* buttons and switches */
 #define HOUR_BTN 16
@@ -22,57 +37,26 @@
 #define RTC_DAT 14
 #define RTC_CE  15
 
-/* button states */
-#define UP   0
-#define DOWN 1
+/* real time clock commands */
+#define RTC_WRITE_SECS 0x80
+#define RTC_READ_SECS  0x81
+#define RTC_WRITE_MINS 0x82
+#define RTC_READ_MINS  0x83
+#define RTC_WRITE_HRS  0x84
+#define RTC_READ_HRS   0x85
+#define RTC_WRITE_DAY  0x86
+#define RTC_READ_DAY   0x87
+#define RTC_WRITE_MTH  0x88
+#define RTC_READ_MTH   0x89
+#define RTC_WRITE_DOW  0x8A
+#define RTC_READ_DOW   0x8B
+#define RTC_WRITE_YR   0x8C
+#define RTC_READ_YR    0x8D
 
-/* switch states */
-#define ON  1
-#define OFF 0
+#define CMD_WRITE_WP   0x8E
+#define CMD_WRITE_TCS  0x90
+
+#define CMD_WRITE_RAM  0xFE
+#define CMD_READ_RAM   0xFF
 
 #endif
-
-#define CMD_RITE_SECS 0x80
-#define CMD_READ_SECS 0x81
-#define CMD_RITE_MINS 0x82
-#define CMD_READ_MINS 0x83
-#define CMD_RITE_HOUR 0x84
-#define CMD_READ_HOUR 0x85
-#define CMD_RITE_DAY  0x86
-#define CMD_READ_DAY  0x87
-#define CMD_RITE_MON  0x88
-#define CMD_READ_MON  0x89
-#define CMD_RITE_DOW  0x8a
-#define CMD_READ_DOW  0x8b
-#define CMD_RITE_YEAR 0x8c
-#define CMD_READ_YEAR 0x8d
-#define CMD_WRITE_TCS 0x90
-
-void writeRTC(unsigned char command, unsigned long data, unsigned short bits);
-
-{
-  int  bit;
-  
-  assert(bits < 32);
-  
-  high(RTC_CE)
-  for(int x=0; x<8; x++)
-  {
-    bit = command & 0x01;
-    output(RTC_DAT, bit)
-    high(RTC_CLK);
-    low(RTC_CLK);
-    command = command >> 1;
-  }
-  
-  for(int x=0; x<bits; x++)
-  {
-    bit = data & 0x01;
-    low(RTC_CLK);
-    output(RTC_DAT, bit)
-    high(RTC_CLK);
-    command = data >> 1;
-  }      
-    
-  low(RTC_CE)
-}  

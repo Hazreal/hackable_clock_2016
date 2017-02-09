@@ -1,120 +1,147 @@
 /*
- *Hackable Clock 2016-17
- *Main Clock Driver
- *AR, 10/26/2016
- */
-
+ * Hackable Clock Project 2016-17
+ * Clock driver (main program file)
+ * arisher@una.edu, 10/25/16
+ *
+*/
 #include "simpletools.h"
+#include "simpletext.h"
+//#include "serial.h"
 #include "clock_defs.h"
+//#include "ds1302.h"
 
-int checkSwitch(int sw_num);
-int checkbutton(int btn_num);
+/*
+ * create 3 user-defined functions
+ * setTime, setAlarm, soundAlarm
+ *
+ * all of the RTC functionality is in ds1302.h and ds1302.c
+ * it is included above
+ *
+ * you may use the print() function while debugging to output to the serial console
+*/
+
+
+void soundAlarm();
 
 int main()
 {
-  int hour=12, minute=0, second=0;
-  int month=1, day=1, year=16;
-  int dow=6;
 
-  int alarmHourSet=-1, alarmMinuteSet=-1;
-  int alarmHour=-1, alarmMinute=-1;
-  int lastMinute=-1;
- /*
-  *initialize LED
-  *read the scratchpad RAM and check the clock configuration flag
-  *if flag is true then load clock configuration from scratchpad RAM
-  * else set default clock configuration (24 hour mode, trickle charger)
- */
+  ubyte month=1, day=1, year=16;
+  ubyte dow=6;
+  ubyte hour=12, minute=0, second=0;
 
-  while(1)
+  ubyte alarmHour=0, alarmMinute=0;
+
+  ubyte config[31];           /* scratchpad ram is 31 bytes, used to store config */
+                              /* first byte is the config valid flag, don't touch */
+                              /* remaining 30 bytes may be used to store anything */
+  serial *ledDisplay;
+  int *alarmCog=NULL;
+  ubyte lastMinute=-1;        /* the last minute that the LED display was updated */
+
+  /*
+   * initialize the LED display, set pin direction (88:88 start message)
+   * set pin directions on buttons, switch, and speaker (beep-boop speaker)
+   * read scratchpad RAM and check clock config flag
+   * if flag is true
+   *   restore clock config from scratchpad RAM
+   * else
+   *   set RTC pin directions
+   *   set RTC write bit, disable halt flag, and enable trickle charger
+   *   set RTC default time and date
+   *   clear scratchpad RAM
+  */
+
+
+  /* wait for circuits to settle before starting clock operation */
+  pause(250);
+
+  /* infinite loop - start clock operation */
+  while (1)
   {
-   /*
-    *get current hour, minute, seconds from RTC
-   */
-   if (minute != lastMinute)
-   {
-    /*
-     *update LED display
-     *lastMinute = minute;
-    */
-   }
+    readTime(&hour, &minute, &second);
 
-   if (checkSwitch(ALRM_SWI) == ON)
-   {
-     /*
-      *set alarm indicator ON
-     */
-     if (hour == alarmHour && minute == alarmMinute)
-     {
-       /*
-        *sound alarm, freqout function
-       */
-       if (checkButton(TIME_BTN) == DOWN)
-       {
-         /*
-         *Sleep alarm for 15 minutes
-         */
-         alarmMinute += 15;
-         if(alarmMinute >= 60){
-           alarmMinute -= 60
-           alarmHour += 1;
-           FREQOUT 11, 1000, 2500;
-         }
-
-       }
-     }
-
-   }
-   else
-   {
-    /*
-     *set alarm indicator off
-    */
-    if (checkbutton(ALRM_BTN) == DOWN)
+    if (minute != lastMinute)
     {
       /*
-       *Call set alarm Function
-       *Update the alarmHour and alarmMinute variables
-       *save alarm times in teh scratchpad RAM
-       *set the valid flag in scratchpad RAM
+       * update LED display, see datasheet for display codes
+       * clock is in 24-hour mode, adjust output to 12-hour mode
       */
     }
-    if (checkbutton(TIME_BTN) == DOWN)
+
+    if (input(ALRM_SWI) == SW_ON)
     {
       /*
-       *Call set time Function
-       *Update the Hour and Minute and second variables
-       *update real time clock with new time
+       * set alarm indicator on LED display to ON and "blink" colon
+      */
+
+      if (hour == alarmHour && minute == alarmMinute && !alarmCog)
+      {
+        /*
+         * sound alarm, start code in new cog
+        */
+      }
+    }
+    else
+      /*
+       * set alarm indicator on LED display to OFF and "blink" colon
+       * stop alarm cog if alarm is beeping
+      */
+
+    if (input(TIME_BTN) == BTN_DOWN)
+    {
+      /*
+       * call set time function
+       * save alarm time in scratchpad RAM
+       * set valid flag in scratchpad RAM
+       * set lastMinute to force screen update
       */
     }
-    
-    /*
-    *set alarmMinute and alarmHour to alarmMinuteSet and alarmMinuteSet
-    */
-    alarmHour = alarmHourSet;
-    alarmMinute = alarmMinuteSet;
-   }
 
-  } /*end of while(1)*/
+    if (input(ALRM_BTN) == BTN_DOWN)
+    {
+      /*
+       * call set alarm function
+       * set alarmHour and alarmMinute
+       * save alarm time in scratchpad RAM
+       * set valid flag in scratchpad RAM
+       * set lastMinute to force screen update
+      */
+    }
 
-  /*Code never gets here, if it does print "HALT" on LED */
+    pause(250); // ### SHORTEN THIS TO 45ms FOR PRODUCTION AND REMOVE THIS COMMENT ###
+  } /* end of while(1) */
+
+  /*
+   * execution should never get here
+   * if it does print "HALt" on LED
+  */
+  writeChar(ledDisplay, 0x76);
+  dprint(ledDisplay, "HALt");
   return 0;
 }
 
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-/*Return the state of the alarm switch, on is true, off is false*/
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
-int checkSwitch(int sw_num)
+//----------------------------------------------------------------------------------
+// This function will kind of play Star Wars
+void soundAlarm()
 {
-  return (input(sw_num) == on);
-}
+    // freqout(int pin,int ms, int frequency);
+    freqout(1,2000, 1046.5);
+    freqout(1,2000, 1568.0);
+    freqout(1,500, 1396.9);
+    freqout(1,500, 1318.5);
+    freqout(1,500, 1174.7);
+    freqout(1,2000, 2093.0);
+    freqout(1,2000, 1568.0);
+    freqout(1,500, 1396.9);
+    freqout(1,500, 1318.5);
+    freqout(1,500, 1174.7);
+    freqout(1,2000, 2093.0);
+    freqout(1,2000, 1568.0);
+    freqout(1,500, 1396.9); //fix this section
+    freqout(1,500, 1318.5);
+    freqout(1,500, 1396.9);
+    freqout(1,2000, 1046.5);
+    pause(5000);
+}  
 
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-/*Return the state of the named switch, down is true, up is false*/
-/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-
-int checkButton(int btn_num)
-{
-  return (input(btn_num) == down;
-}
