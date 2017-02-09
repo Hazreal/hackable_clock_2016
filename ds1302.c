@@ -1,11 +1,33 @@
-
+//ds1302.c
 
 /*
  * initialize the ds1302 registers and set the default time and date
- * zero the 31 bytes of scratchpad memory
+ * zero the 31 bytes of scratchpad ram with a burst write
+ * (erase and invalidate)
+ * the RTC supports individual byte access to ram, we always use
+ * burst I/O
  */
-
-void defaultRTC(
+void defaultRTC(ubyte mon, ubyte day, ubyte yr, ubyte dow, 
+  ubyte hr, ubyte min, ubyte sec)
+{
+ ubyte data[31];
+ 
+  set_direction(RTC_CLK, PIN_OUT);
+  set_direction(RTC_DAT, PIN_OUT); 
+  set_direction(RTC_CE, PIN_OUT);
+   
+  data[0] = ('\0');
+  writeRTC(CMD_WRITE_WP, data, 1);
+ 
+  data[0] = 0xA5; /* trickle charger on with 1 diode, 2K ohms */
+  writeRTC(CMD_WRITE_TCS, data, 1);
+  
+  writeTime(hr, min, sec);
+  writeDate(mon, day, yr, dow);
+  
+  memset(data, '\0', 31);
+  writeRTC(CMD_WRITE_RAM, data, 31);
+}  
 
 /* write 31 bytes of data to the scratchpad RAM */
 void saveConfig(ubyte data[])
@@ -22,13 +44,57 @@ int getConfig(ubyte data[])
   return (data[0] == 0xAA);  
 }
 
-void writeTime(
+void writeTime(ubyte hr, ubyte min, ubyte sec)
+{
+  ubyte data[1];
+ 
+  data[0] = bin2bcd(hr) & 0x3F; /* Enable 24 hr mode */
+  writeRTC(RTC_WRITE_HRS, data, 1); 
+  data[0] = bin2bcd(min);
+  writeRTC(RTC_WRITE_MINS, data, 1);
+  data[0] = bin2bcd(sec) & 0x7F; /* clock halt disabled */
+  writeRTC(RTC_WRITE_SECS, data, 1);
+}  
 
-void readTime(
+void readTime(ubyte *hr, ubyte *min, ubyte *sec)
+{
+  ubyte data[1] = {'\0'};
+  
+  readRTC(RTC_READ_HRS, data, 1);
+  *hr = bcd2bin(data[0]); 
+  readRTC(RTC_READ_MINS, data, 1);
+  *min = bcd2bin(data[0]);
+  readRTC(RTC_READ_SECS, data, 1);
+  *sec = bcd2bin(data[0]);
+}  
 
-void writeDate(
+void writeDate(ubyte month, ubyte day, ubyte year, ubyte dow)
+{
+  ubyte data[1];
+  
+  data[0] = bin2bcd(month);
+  writeRTC(RTC_WRITE_MTH, data, 1);
+  data[0] = bin2bcd(day);
+  writeRTC(RTC_WRITE_DAY, data, 1);
+  data[0] = bin2bcd(year);
+  writeRTC(RTC_WRITE_YR, data, 1);
+  data[0] = bin2bcd(dow);
+  writeRTC(RTC_WRITE_DOW, data, 1);  
+}  
 
-void readDate(
+void readDate(ubyte *month, ubyte *day, ubyte *year, ubyte *dow)
+{
+  ubyte data[1] = ("\0");
+  
+  readRTC(READ_RTC_MTH, data, 1);
+  *month = bcd2bin(data[0]);
+  readRTC(READ_RTC_DAY, data, 1);
+  *day = bcd2bin(data[0]);
+  readRTC(READ_RTC_YR, data, 1);
+  *year = bcd2bin(data[0]);
+  readRTC(READ_RTC_DOW, data, 1);
+  *dow = bcd2bin(data[0]); 
+}  
 
 void writeRTC(ubyte command, ubyte data[], ubyte dataLen)
 {
