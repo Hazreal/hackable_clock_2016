@@ -26,6 +26,8 @@ bin2bcd
 /* ---------------------------------------------------------------------------------------
  * writes occur lsb first, reads occur lsb first - see DS1302 datasheet
 */
+
+
 void writeRTC(ubyte command, ubyte data[], ubyte datalen)
 {
   high(RTC_CE);
@@ -83,7 +85,7 @@ ubyte bcd2bin (ubyte data)
 /* ---------------------------------------------------------------------------------------
  * 
 */
-ubyte bin2bcd
+ubyte bin2bcd (ubyte data)
 {
   int tensDigit = data/10;
   return(data - (tensDigit * 10) + (tensDigit << 4)); 

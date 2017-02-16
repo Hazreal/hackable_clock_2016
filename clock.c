@@ -5,9 +5,9 @@
 */
 #include "simpletools.h"
 #include "simpletext.h"
-//#include "serial.h"
+#include "serial.h"
 #include "clock_defs.h"
-//#include "ds1302.h"
+#include "ds1302.h"
 
 /*
  * create 3 user-defined functions
@@ -43,7 +43,8 @@ int main()
   
   writeChar(ledDisplay, 0x76);
   dprint(ledDisplay, "8888");
-  
+  writeChar(ledDisplayer, 0x77);
+  writeChar(ledDisplay, 0x3F);
   
   /*
    * initialize the LED display, set pin direction (88:88 start message)
@@ -57,8 +58,14 @@ int main()
    *   set RTC default time and date
    *   clear scratchpad RAM
   */
-
-
+  if (getConfig(config))
+  {
+    alarmHour = config[1];
+    alarmMinute = config[2];
+  }
+  else
+    defaultRTC(month, day, year, dow, hour, minute, second);
+    
   /* wait for circuits to settle before starting clock operation */
   pause(250);
 
@@ -77,23 +84,35 @@ int main()
 
     if (input(ALRM_SWI) == SW_ON)
     {
-      /*
-       * set alarm indicator on LED display to ON and "blink" colon
-      */
-
-      if (hour == alarmHour && minute == alarmMinute && !alarmCog)
+                   
+      if (second % 2 == 0)  // set alarm indicator on LED display to ON and "blink" colon
       {
-        /*
-         * sound alarm, start code in new cog
-        */
+        writechar(ledDisplay, 0x77);
+        writeChar(ledDisplay, 0x20);
+      }
+      else
+      {
+        writeChar(ledDisplay, 0x77);
+        writeChar(ledDisplay, 0x10); 
+      }           
+      if (hour == alarmHour && minute == alarmMinute && !alarmCog) //sound alarm, start code in new cog
+      {
+        alarmCog = cog_run(soundAlarm, 16);
       }
     }
-    else
-      /*
-       * set alarm indicator on LED display to OFF and "blink" colon
-       * stop alarm cog if alarm is beeping
-      */
-
+    
+    else //Alarm Switch is off
+    {
+      writeChar(ledDisplay, 0x77);      //set alarm indicator on LED display to OFF and "blink" colon
+      writeChar(ledDisplay, 0x00);    
+    
+      if (alarmCog) //stop alarm cog if alarm is beeping
+      {
+       cog_end(alarmCog);
+       alarmCog = NULL;
+      }        
+    }    
+      
     if (input(TIME_BTN) == BTN_DOWN)
     {
       /*

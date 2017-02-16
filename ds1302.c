@@ -1,4 +1,5 @@
-//ds1302.c
+#include "clock_defs.h"
+#include "ds1302.h"
 
 /*
  * initialize the ds1302 registers and set the default time and date
@@ -146,7 +147,7 @@ void readRTC(ubyte command, ubyte data[], ubyte datalen)
 
 ubyte reverseByte(ubyte byte)
 {
-    ubyte newByte = '\0'
+    ubyte newByte = '\0';
     
     for(int i=0; i<8; i++)
     {
