@@ -29,15 +29,22 @@ int main()
   ubyte dow=6;
   ubyte hour=12, minute=0, second=0;
 
-  ubyte alarmHour=0, alarmMinute=0;
+  ubyte alarmHour=12, alarmMinute=0;
 
   ubyte config[31];           /* scratchpad ram is 31 bytes, used to store config */
                               /* first byte is the config valid flag, don't touch */
                               /* remaining 30 bytes may be used to store anything */
   serial *ledDisplay;
   int *alarmCog=NULL;
-  ubyte lastMinute=-1;        /* the last minute that the LED display was updated */
-
+  ubyte lastMinute=255;        /* the last minute that the LED display was updated */
+  
+  set_direction(DISPLAY, PIN_OUT);
+  ledDisplay = serial_open(-1, DISPLAY);
+  
+  writeChar(ledDisplay, 0x76);
+  dprint(ledDisplay, "8888");
+  
+  
   /*
    * initialize the LED display, set pin direction (88:88 start message)
    * set pin directions on buttons, switch, and speaker (beep-boop speaker)

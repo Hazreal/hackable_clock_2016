@@ -1,7 +1,7 @@
 /*
  * Hackable Clock Project 2016-17
  * Microcontroller pin names and other handy names for things
- *
+ * to force git to reconize change
 */
 #ifndef CLOCK_H
 #define CLOCK_H

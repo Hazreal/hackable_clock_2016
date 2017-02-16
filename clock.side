@@ -2,7 +2,6 @@ clock.c
 clock_defs.h
 ds1302.c
 ds1302.h
-ds1302.c
 >compiler=C
 >memtype=cmm main ram compact
 >optimize=-Os

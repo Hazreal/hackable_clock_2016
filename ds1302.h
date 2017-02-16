@@ -20,6 +20,7 @@ bcd2bin (ubyte data)
 bin2bcd
     int tensDigit = data/10;
     return(data - (tensDigit * 10) + (tensDigit << 4)); 
+    to be removed here
 */
 
 /* ---------------------------------------------------------------------------------------

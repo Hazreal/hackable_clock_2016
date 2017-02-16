@@ -6,6 +6,7 @@
  * (erase and invalidate)
  * the RTC supports individual byte access to ram, we always use
  * burst I/O
+  to be removed
  */
 void defaultRTC(ubyte mon, ubyte day, ubyte yr, ubyte dow, 
   ubyte hr, ubyte min, ubyte sec)
