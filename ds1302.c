@@ -88,13 +88,13 @@ void readDate(ubyte *month, ubyte *day, ubyte *year, ubyte *dow)
 {
   ubyte data[1] = ("\0");
   
-  readRTC(READ_RTC_MTH, data, 1);
+  readRTC(RTC_READ_MTH, data, 1);
   *month = bcd2bin(data[0]);
-  readRTC(READ_RTC_DAY, data, 1);
+  readRTC(RTC_READ_DAY, data, 1);
   *day = bcd2bin(data[0]);
-  readRTC(READ_RTC_YR, data, 1);
+  readRTC(RTC_READ_YR, data, 1);
   *year = bcd2bin(data[0]);
-  readRTC(READ_RTC_DOW, data, 1);
+  readRTC(RTC_READ_DOW, data, 1);
   *dow = bcd2bin(data[0]); 
 }  
 

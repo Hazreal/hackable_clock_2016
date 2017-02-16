@@ -46,6 +46,9 @@ int main()
   writeChar(ledDisplayer, 0x77);
   writeChar(ledDisplay, 0x3F);
   
+  freqout(1,500, 1000);
+  freqout(1,500, 1500);
+  
   /*
    * initialize the LED display, set pin direction (88:88 start message)
    * set pin directions on buttons, switch, and speaker (beep-boop speaker)

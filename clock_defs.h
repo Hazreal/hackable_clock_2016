@@ -44,13 +44,13 @@ typedef unsigned char ubyte;
 #define RTC_WRITE_HRS  0x84
 #define RTC_READ_HRS   0x85
 #define RTC_WRITE_DAY  0x86
-#define READ_RTC_DAY   0x87
+#define RTC_READ_DAY   0x87
 #define RTC_WRITE_MTH  0x88
-#define READ_RTC_MTH   0x89
+#define RTC_READ_MTH   0x89
 #define RTC_WRITE_DOW  0x8A
-#define READ_RTC_DOW   0x8B
+#define RTC_READ_DOW   0x8B
 #define RTC_WRITE_YR   0x8C
-#define READ_RTC_YR    0x8D
+#define RTC_READ_YR    0x8D
 
 #define CMD_WRITE_WP   0x8E
 #define CMD_WRITE_TCS  0x90
