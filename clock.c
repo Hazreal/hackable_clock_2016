@@ -39,11 +39,11 @@ int main()
   ubyte lastMinute=255;        /* the last minute that the LED display was updated */
   
   set_direction(DISPLAY, PIN_OUT);
-  ledDisplay = serial_open(-1, DISPLAY);
-  
+  ledDisplay = serial_open(-1, DISPLAY, 0, 9600);
+
   writeChar(ledDisplay, 0x76);
   dprint(ledDisplay, "8888");
-  writeChar(ledDisplayer, 0x77);
+  writeChar(ledDisplay, 0x77);
   writeChar(ledDisplay, 0x3F);
   
   freqout(1,500, 1000);
@@ -76,6 +76,8 @@ int main()
   while (1)
   {
     readTime(&hour, &minute, &second);
+printf("%d:%d:%d\n",hour, minute, second);
+pause(500);
 
     if (minute != lastMinute)
     {
@@ -83,6 +85,7 @@ int main()
        * update LED display, see datasheet for display codes
        * clock is in 24-hour mode, adjust output to 12-hour mode
       */
+dprint(ledDisplay, "1111");
     }
 
     if (input(ALRM_SWI) == SW_ON)
@@ -90,7 +93,7 @@ int main()
                    
       if (second % 2 == 0)  // set alarm indicator on LED display to ON and "blink" colon
       {
-        writechar(ledDisplay, 0x77);
+        writeChar(ledDisplay, 0x77);
         writeChar(ledDisplay, 0x20);
       }
       else
