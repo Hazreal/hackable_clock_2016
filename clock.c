@@ -21,6 +21,8 @@
 
 
 void soundAlarm();
+int setTime(ubyte hour, ubyte minute, serial *display);
+int setAlarm(ubyte *hour, ubyte *minute, serial *display);
 
 int main()
 {
@@ -45,10 +47,9 @@ int main()
   dprint(ledDisplay, "8888");
   writeChar(ledDisplay, 0x77);
   writeChar(ledDisplay, 0x3F);
-  
-  freqout(1,500, 1000);
-  freqout(1,500, 1500);
-  
+    
+ // freqout(11, 100, 1000); 
+ // freqout(11, 100, 3000);
   /*
    * initialize the LED display, set pin direction (88:88 start message)
    * set pin directions on buttons, switch, and speaker (beep-boop speaker)
@@ -75,9 +76,10 @@ int main()
   /* infinite loop - start clock operation */
   while (1)
   {
-    readTime(&hour, &minute, &second);
-printf("%d:%d:%d\n",hour, minute, second);
-pause(500);
+//TODO REMOVE
+//readTime(&hour, &minute, &second);
+//printf("%d:%d:%d\n",hour, minute, second);
+//pause(500);
 
     if (minute != lastMinute)
     {
@@ -85,12 +87,14 @@ pause(500);
        * update LED display, see datasheet for display codes
        * clock is in 24-hour mode, adjust output to 12-hour mode
       */
-dprint(ledDisplay, "1111");
+      writeChar(ledDisplay, 0x77);
+      writeChar(ledDisplay, 0x79);
+      writeChar(ledDisplay, 0x01);
+      dprint(ledDisplay, "%d%02d", hour, minute);
     }
 
     if (input(ALRM_SWI) == SW_ON)
-    {
-                   
+    {            
       if (second % 2 == 0)  // set alarm indicator on LED display to ON and "blink" colon
       {
         writeChar(ledDisplay, 0x77);
@@ -127,6 +131,8 @@ dprint(ledDisplay, "1111");
        * set valid flag in scratchpad RAM
        * set lastMinute to force screen update
       */
+      setTime(hour, minute, ledDisplay);
+      lastMinute = -1;
     }
 
     if (input(ALRM_BTN) == BTN_DOWN)
@@ -139,7 +145,8 @@ dprint(ledDisplay, "1111");
        * set lastMinute to force screen update
       */
     }
-
+    print("%d:%02d \n", hour, minute);
+    lastMinute = minute;
     pause(250); // ### SHORTEN THIS TO 45ms FOR PRODUCTION AND REMOVE THIS COMMENT ###
   } /* end of while(1) */
 
@@ -176,3 +183,61 @@ void soundAlarm()
     pause(5000);
 }  
 
+
+/**********************************
+ *switch display into time set mode
+ *return true if time changed
+***********************************/
+int setTime(ubyte hour, ubyte minute, serial *display)
+{
+  ubyte hr = hour;
+  ubyte min = minute;
+  writeChar(display, 0x76);
+  dprint(display, "%02d%02d", hr, min);
+  
+  while (input(TIME_BTN) == BTN_DOWN)
+  {
+    if (input(HOUR_BTN) == BTN_DOWN)
+      hr = (hr + 1)%24;
+    
+    if (input(MNIT_BTN) == BTN_DOWN)
+      min = (min+1)%60;
+    
+    writeChar(display, 0x79);
+    writeChar(display, 0x00);
+    dprint(display, "%02d%02d", hr, min);
+    pause(250);         
+  }
+  int timeChanged = (hr != hour || min != minute);
+  if (timeChanged)
+    writeTime(hr, min, 0);
+  
+  return timeChanged;     
+}
+
+int setAlarm(ubyte *hour, ubyte *minute, serial *display)
+{
+  ubyte hr = hour;
+  ubyte min = minute;
+  writeChar(display, 0x76);
+  dprint(display, "%02d%02d", hr, min);
+  
+  while (input(TIME_BTN) == BTN_DOWN)
+  {
+    if (input(HOUR_BTN) == BTN_DOWN)
+      hr = (hr + 1)%24;
+    
+    if (input(MNIT_BTN) == BTN_DOWN)
+      min = (min+1)%60;
+    
+    writeChar(display, 0x79);
+    writeChar(display, 0x00);
+    dprint(display, "%02d%02d", hr, min);
+    pause(250);         
+  }
+  int timeChanged = (hr != hour || min != minute);
+  if (timeChanged)
+    writeTime(hr, min, 0);
+  
+  return timeChanged;     
+}    

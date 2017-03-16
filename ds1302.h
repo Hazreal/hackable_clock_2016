@@ -11,7 +11,7 @@ void readDate(ubyte *month, ubyte *day, ubyte *year, ubyte *dow);
 void writeRTC(ubyte command, ubyte data[], ubyte dataLen);
 void readRTC(ubyte command, ubyte data[], ubyte datalen);
 ubyte reverseByte(ubyte byte);
-ubyte bin2bcd (ubyte data);
-ubyte bcd2bin (ubyte data);
+ubyte bin2bcd(ubyte data);
+ubyte bcd2bin(ubyte data);
 
 #endif
