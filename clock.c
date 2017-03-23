@@ -242,10 +242,6 @@ void setAlarm(ubyte *hour, ubyte *minute, serial *display)
     dprint(display, "%02d%02d", hr, min);
     pause(250);         
   }  
-  int alarmChanged = (hr != hour || min != minute);
-  if (alarmChanged)
-  {
     hour = hr;       
-    minute = min;
-  }  
+    minute = min; 
 }    
