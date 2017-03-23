@@ -22,7 +22,7 @@
 
 void soundAlarm();
 int setTime(ubyte hour, ubyte minute, serial *display);
-int setAlarm(ubyte *hour, ubyte *minute, serial *display);
+void setAlarm(ubyte *hour, ubyte *minute, serial *display);
 
 int main()
 {
@@ -31,7 +31,7 @@ int main()
   ubyte dow=6;
   ubyte hour=12, minute=0, second=0;
 
-  ubyte alarmHour=12, alarmMinute=0;
+  ubyte alarmHour=13, alarmMinute=0;
 
   ubyte config[31];           /* scratchpad ram is 31 bytes, used to store config */
                               /* first byte is the config valid flag, don't touch */
@@ -77,7 +77,7 @@ int main()
   while (1)
   {
 //TODO REMOVE
-//readTime(&hour, &minute, &second);
+  readTime(&hour, &minute, &second);
 //printf("%d:%d:%d\n",hour, minute, second);
 //pause(500);
 
@@ -87,9 +87,10 @@ int main()
        * update LED display, see datasheet for display codes
        * clock is in 24-hour mode, adjust output to 12-hour mode
       */
-      writeChar(ledDisplay, 0x77);
-      writeChar(ledDisplay, 0x79);
-      writeChar(ledDisplay, 0x01);
+      writeChar(ledDisplay, 0x76);
+      //writeChar(ledDisplay, 0x77);
+      //writeChar(ledDisplay, 0x79);
+      //writeChar(ledDisplay, 0x01);
       dprint(ledDisplay, "%d%02d", hour, minute);
     }
 
@@ -144,8 +145,10 @@ int main()
        * set valid flag in scratchpad RAM
        * set lastMinute to force screen update
       */
+      setAlarm(alarmHour, alarmMinute, ledDisplay);
+      dprint(ledDisplay, "%d%02d", hour, minute);
     }
-    print("%d:%02d \n", hour, minute);
+    print("%d:%02d %d:%02d \n", hour, minute, alarmHour, alarmMinute);
     lastMinute = minute;
     pause(250); // ### SHORTEN THIS TO 45ms FOR PRODUCTION AND REMOVE THIS COMMENT ###
   } /* end of while(1) */
@@ -164,22 +167,22 @@ int main()
 void soundAlarm()
 {
     // freqout(int pin,int ms, int frequency);
-    freqout(1,2000, 1046.5);
-    freqout(1,2000, 1568.0);
-    freqout(1,500, 1396.9);
-    freqout(1,500, 1318.5);
-    freqout(1,500, 1174.7);
-    freqout(1,2000, 2093.0);
-    freqout(1,2000, 1568.0);
-    freqout(1,500, 1396.9);
-    freqout(1,500, 1318.5);
-    freqout(1,500, 1174.7);
-    freqout(1,2000, 2093.0);
-    freqout(1,2000, 1568.0);
-    freqout(1,500, 1396.9); //fix this section
-    freqout(1,500, 1318.5);
-    freqout(1,500, 1396.9);
-    freqout(1,2000, 1046.5);
+    freqout(11,2000, 1046.5);
+    freqout(11,2000, 1568.0);
+    freqout(11,500, 1396.9);
+    freqout(11,500, 1318.5);
+    freqout(11,500, 1174.7);
+    freqout(11,2000, 2093.0);
+    freqout(11,2000, 1568.0);
+    freqout(11,500, 1396.9);
+    freqout(11,500, 1318.5);
+    freqout(11,500, 1174.7);
+    freqout(11,2000, 2093.0);
+    freqout(11,2000, 1568.0);
+    freqout(11,500, 1396.9); //fix this section
+    freqout(11,500, 1318.5);
+    freqout(11,500, 1396.9);
+    freqout(11,2000, 1046.5);
     pause(5000);
 }  
 
@@ -214,30 +217,35 @@ int setTime(ubyte hour, ubyte minute, serial *display)
   
   return timeChanged;     
 }
-
-int setAlarm(ubyte *hour, ubyte *minute, serial *display)
+/***********************************
+ *switchs display to show alarm mode
+ *alters alarmHour and alarmMinute
+ *by reference
+ ***********************************/
+void setAlarm(ubyte *hour, ubyte *minute, serial *display)
 {
   ubyte hr = hour;
   ubyte min = minute;
   writeChar(display, 0x76);
   dprint(display, "%02d%02d", hr, min);
   
-  while (input(TIME_BTN) == BTN_DOWN)
+  while (input(ALRM_BTN) == BTN_DOWN)
   {
-    if (input(HOUR_BTN) == BTN_DOWN)
-      hr = (hr + 1)%24;
+    //if (input(HOUR_BTN) == BTN_DOWN)
+    //  hr = (hr + 1)%24;
     
-    if (input(MNIT_BTN) == BTN_DOWN)
+    if (input(HOUR_BTN) == BTN_DOWN)
       min = (min+1)%60;
     
     writeChar(display, 0x79);
     writeChar(display, 0x00);
     dprint(display, "%02d%02d", hr, min);
     pause(250);         
-  }
-  int timeChanged = (hr != hour || min != minute);
-  if (timeChanged)
-    writeTime(hr, min, 0);
-  
-  return timeChanged;     
+  }  
+  int alarmChanged = (hr != hour || min != minute);
+  if (alarmChanged)
+  {
+    hour = hr;       
+    minute = min;
+  }  
 }    
