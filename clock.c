@@ -91,7 +91,7 @@ int main()
       //writeChar(ledDisplay, 0x77);
       //writeChar(ledDisplay, 0x79);
       //writeChar(ledDisplay, 0x01);
-      dprint(ledDisplay, "%d%02d", hour, minute);
+      dprint(ledDisplay, "%d:%02d", hour, minute);
     }
 
     if (input(ALRM_SWI) == SW_ON)
@@ -231,10 +231,10 @@ void setAlarm(ubyte *hour, ubyte *minute, serial *display)
   
   while (input(ALRM_BTN) == BTN_DOWN)
   {
-    //if (input(HOUR_BTN) == BTN_DOWN)
-    //  hr = (hr + 1)%24;
-    
     if (input(HOUR_BTN) == BTN_DOWN)
+      hr = ((hr + 1)%24);
+    
+    if (input(MNIT_BTN) == BTN_DOWN)
       min = (min+1)%60;
     
     writeChar(display, 0x79);
@@ -242,6 +242,5 @@ void setAlarm(ubyte *hour, ubyte *minute, serial *display)
     dprint(display, "%02d%02d", hr, min);
     pause(250);         
   }  
-    hour = hr;       
-    minute = min; 
+ 
 }    
